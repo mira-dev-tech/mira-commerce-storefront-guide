@@ -77,7 +77,7 @@ curl -s -X POST "$API/checkout/sessions" \
 | [04 — Pagamento](docs/04-pagamento.md) | As opções da etapa de pagamento: redirect ao gateway, widget embutido (3DS in-page) e offline para testes |
 | [05 — Storefront estático com Next.js](docs/05-storefront-estatico-nextjs.md) | O padrão de produção da vitrine: static export, envs, build e deploy |
 | [06 — Minha conta](docs/06-minha-conta.md) | Login do comprador por magic-link, sessão, "meus pedidos" e perfil |
-| [07 — SDKs TypeScript](docs/07-sdk-typescript.md) | Tudo acima com tipos: `@mira/commerce-client-sdk` + helpers de checkout |
+| [07 — SDKs TypeScript](docs/07-sdk-typescript.md) | Tudo acima com tipos: `@mira-commerce/client-sdk` + helpers de checkout — publicados no npm |
 
 ## As 5 regras de segurança (não negociáveis)
 

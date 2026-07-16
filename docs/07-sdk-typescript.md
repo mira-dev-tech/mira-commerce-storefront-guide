@@ -6,18 +6,21 @@ SDK nunca diverge do contrato: cada release da API regenera o cliente.
 
 | Pacote | O que é |
 |--------|---------|
-| `@mira/commerce-client-sdk` | Cliente base: uma função tipada por operação da API (`listProducts`, `resolvePrice`, `createCheckoutSession`…) + `createCommerceClient` para configurar auth/tenant uma vez |
-| `@mira/commerce-checkout-sdk` | Helpers finos do funil de checkout por cima do cliente base (`createCheckoutSession` / `patchCheckoutSession` / `placeCheckoutOrder`) |
+| [`@mira-commerce/client-sdk`](https://www.npmjs.com/package/@mira-commerce/client-sdk) | Cliente base: uma função tipada por operação da API (`listProducts`, `resolvePrice`, `createCheckoutSession`…) + `createCommerceClient` para configurar auth/tenant uma vez |
+| [`@mira-commerce/checkout-sdk`](https://www.npmjs.com/package/@mira-commerce/checkout-sdk) | Helpers finos do funil de checkout por cima do cliente base (`createCheckoutSession` / `patchCheckoutSession` / `placeCheckoutOrder`) |
 
-> **Disponibilidade:** os pacotes ainda **não estão no npm público** — são
-> fornecidos no onboarding (a publicação npm está no roadmap). Por isso este
-> guia é REST-first: o `curl` é o contrato de referência, e o SDK é a mesma
-> coisa com tipos. Tudo que você aprendeu nos docs 01–06 se aplica igual.
+```bash
+npm install @mira-commerce/client-sdk @mira-commerce/checkout-sdk
+```
+
+Fonte: [mira-commerce-sdk-js](https://github.com/mira-dev-tech/mira-commerce-sdk-js).
+O guia continua REST-first — o `curl` é o contrato de referência e o SDK é a
+mesma coisa com tipos; tudo dos docs 01–06 se aplica igual.
 
 ## Configurar o cliente (uma vez)
 
 ```ts
-import { createCommerceClient } from "@mira/commerce-client-sdk";
+import { createCommerceClient } from "@mira-commerce/client-sdk";
 
 const client = createCommerceClient({
   baseUrl: `${process.env.COMMERCE_API_URL}/v1`, // https://api.mira-dev.tech/v1
@@ -35,7 +38,7 @@ server-side ou no build.
 ## Vitrine — catálogo tipado
 
 ```ts
-import { listProducts, resolvePrice } from "@mira/commerce-client-sdk";
+import { listProducts, resolvePrice } from "@mira-commerce/client-sdk";
 
 const { data: products } = await listProducts({
   client,
@@ -55,12 +58,12 @@ substitui a leitura do spec.
 ## Checkout — os helpers do funil
 
 ```ts
-import { createCommerceClient } from "@mira/commerce-client-sdk";
+import { createCommerceClient } from "@mira-commerce/client-sdk";
 import {
   createCheckoutSession,
   patchCheckoutSession,
   placeCheckoutOrder,
-} from "@mira/commerce-checkout-sdk";
+} from "@mira-commerce/checkout-sdk";
 
 // no seu BFF — o comprador nunca vê estes tokens
 const session = await createCheckoutSession(client, {
