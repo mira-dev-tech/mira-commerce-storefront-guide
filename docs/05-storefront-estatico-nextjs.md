@@ -8,7 +8,7 @@ para operar, performance máxima, e o token de integrador morre no build.
 ```text
 build (CI) ──Bearer──▶ Core API ──▶ páginas estáticas ──▶ CDN ──▶ comprador
                                                              │
-                                     checkout: hospedado, embed ou seu BFF
+                              checkout headless: seu funil + BFF (docs 03/04)
 ```
 
 ## As três variáveis de ambiente
@@ -71,8 +71,9 @@ fluxo de checkout por sessão (o `cks_tok_` é do comprador). O padrão:
 
 - **Vitrine (produto, descrição, mídia)**: baked no build.
 - **Preço/estoque em tempo real** (opcional): fetch client-side ao seu BFF.
-- **Checkout**: nunca estático — hospedado ([README](../README.md), caminho 1),
-  embed ([doc 04](04-pagamento.md)) ou seu funil com BFF ([doc 03](03-checkout.md)).
+- **Checkout e minha conta**: nunca estáticos — são o seu funil com BFF
+  ([doc 03](03-checkout.md) e [doc 06](06-minha-conta.md)); a etapa de
+  pagamento usa gateway ou widget embutido ([doc 04](04-pagamento.md)).
 
 ## Quando você precisa de um BFF (e onde ele roda)
 
@@ -102,6 +103,6 @@ Duas estratégias, combináveis:
 3. [ ] `generateStaticParams` cobre todas as rotas dinâmicas
 4. [ ] Tratamento de 402/403/409/429 com mensagens de UX ([doc 03](03-checkout.md))
 5. [ ] `Idempotency-Key` em place-order/confirm
-6. [ ] Domínio autorizado para o embed de pagamento (se usar o caminho 3)
+6. [ ] Domínio autorizado para o widget de pagamento embutido (se usar)
 7. [ ] Estratégia de rebuild definida (cron e/ou webhook)
 8. [ ] Confirmação de pedido lê o status real, não o `postMessage`

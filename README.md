@@ -1,39 +1,39 @@
 # Construindo um storefront para o Mira Commerce
 
-Guia oficial para criar a **loja (vitrine + checkout)** da sua marca em cima da
-plataforma [Mira Commerce](https://mira-dev.tech), consumindo as APIs REST da
-plataforma. Você é dono de 100% da experiência do comprador; catálogo, preço,
-estoque, pedido, pagamento e antifraude são autoritativos no core da
-plataforma.
+Guia oficial para construir a **experiência completa de loja** — vitrine,
+checkout e área do cliente ("minha conta") — em cima da plataforma
+[Mira Commerce](https://mira-dev.tech).
+
+O modelo é **headless por definição**: o front é 100% seu (seu código, seu
+domínio, sua UX); catálogo, preço, estoque, pedido, pagamento, antifraude e
+identidade do comprador são autoritativos no core da plataforma, consumidos
+por API REST.
 
 ```mermaid
 flowchart LR
-  subgraph voce [Você constrói]
-    SF[Storefront<br/>site/app da marca]
-    CK[Checkout próprio<br/>opcional]
+  subgraph voce [Você constrói — headless]
+    SF[Vitrine]
+    CK[Checkout]
+    MC[Minha conta]
   end
-  subgraph mira [Plataforma Mira Commerce]
+  subgraph mira [Plataforma Mira Commerce — API]
     API[Core API REST<br/>api.mira-dev.tech/v1]
-    HC[Checkout hospedado]
-    PAY[Pagamento embutível<br/>iframe]
+    PAY[Etapa de pagamento<br/>gateway ou widget embutido]
   end
   SF -- catálogo, preço, frete --> API
-  SF -- caminho 1: redirect --> HC
-  CK -- caminho 2: checkout sessions --> API
-  CK -- caminho 3: só o pagamento --> PAY
+  CK -- checkout sessions --> API
+  CK -- só a etapa de pagamento --> PAY
+  MC -- sessão do comprador --> API
 ```
 
-## Os três caminhos — escolha o seu
+## O que você constrói × o que a plataforma garante
 
-| Caminho | Você constrói | A plataforma cuida de | Esforço |
-|---------|---------------|------------------------|---------|
-| **1. Checkout hospedado** | Só a vitrine | Todo o checkout, identidade, pagamento, antifraude | ⭐ |
-| **2. Checkout headless** | Vitrine + checkout completo | Validação, pedido, pagamento (via API) | ⭐⭐⭐ |
-| **3. Checkout próprio + pagamento embutido** | Vitrine + carrinho/identidade/entrega | Só a etapa de pagamento (iframe, PCI incluso) | ⭐⭐ |
-
-Recomendação: comece pelo **caminho 1** (vitrine no ar em dias), evolua para o
-**3** quando quiser controlar a UX do funil, e vá ao **2** apenas se precisar
-de um funil 100% proprietário (app nativo, WhatsApp, ERP).
+| Superfície | Você constrói | A plataforma garante (via API) |
+|------------|---------------|--------------------------------|
+| **Vitrine** | Páginas, navegação, busca, UX | Catálogo, preço resolvido, estoque, frete |
+| **Checkout** | O funil inteiro (carrinho → identidade → fechamento) | Validação, recálculo de totais, criação/submit do pedido, antifraude, regras da loja |
+| **Pagamento** | A tela onde a etapa acontece | Cobrança via gateway (redirect) ou widget embutido com 3DS — **PAN/CVV nunca passam pelo seu código** |
+| **Minha conta** | Login, "meus pedidos", perfil | Identidade do comprador (magic-link), sessão, histórico de pedidos |
 
 ## Pré-requisitos (recebidos no onboarding)
 
@@ -61,21 +61,22 @@ curl -s "$API/products?limit=5" \
 curl -s "$API/prices/resolve?sku=SKU-001&channel=web" \
   -H "Authorization: Bearer $TOKEN" -H "X-Tenant-ID: $MEMBER"
 
-# 3. Abrir uma sessão de checkout (a base do caminho 2)
+# 3. Abrir uma sessão de checkout (a espinha dorsal do seu funil)
 curl -s -X POST "$API/checkout/sessions" \
   -H "X-Tenant-ID: $MEMBER" -H "Content-Type: application/json" \
   -d '{"member_id":"'$MEMBER'","channel":"web","state":{"cart":[]}}'
 ```
 
-## Mapa do guia
+## Mapa do guia (a jornada completa, em ordem)
 
 | Doc | O que ensina |
 |-----|--------------|
 | [01 — Autenticação e tenancy](docs/01-autenticacao.md) | Os 3 tipos de credencial, o header `X-Tenant-ID`, sandbox vs produção, a regra do BFF |
 | [02 — Catálogo, preço e estoque](docs/02-catalogo.md) | Produtos, SKUs, resolução de preço, frete — a matéria-prima da vitrine |
 | [03 — Checkout headless](docs/03-checkout.md) | Sessões de checkout de ponta a ponta: carrinho → identidade → place-order |
-| [04 — Pagamento](docs/04-pagamento.md) | Redirect hospedado, iframe embutido (com 3DS in-page) e método offline para testes |
-| [05 — Storefront estático com Next.js](docs/05-storefront-estatico-nextjs.md) | O padrão que usamos em produção: static export, envs, build e deploy |
+| [04 — Pagamento](docs/04-pagamento.md) | As opções da etapa de pagamento: redirect ao gateway, widget embutido (3DS in-page) e offline para testes |
+| [05 — Storefront estático com Next.js](docs/05-storefront-estatico-nextjs.md) | O padrão de produção da vitrine: static export, envs, build e deploy |
+| [06 — Minha conta](docs/06-minha-conta.md) | Login do comprador por magic-link, sessão, "meus pedidos" e perfil |
 
 ## As 5 regras de segurança (não negociáveis)
 
@@ -83,8 +84,8 @@ curl -s -X POST "$API/checkout/sessions" \
    server-side ou build. No front, use BFF ou dados baked no build estático.
 2. **`member_id` é público** — pode ir em `NEXT_PUBLIC_*`; ele identifica, não
    autentica.
-3. **Nunca capture PAN/CVV de cartão** — o pagamento acontece no checkout
-   hospedado ou no iframe embutido (PCI SAQ A fica conosco).
+3. **Nunca capture PAN/CVV de cartão** — a etapa de pagamento acontece no
+   gateway ou no widget embutido (PCI SAQ A fica conosco).
 4. **`Idempotency-Key` em toda chamada que cria pedido ou cobra** — retry
    seguro em rede móvel.
 5. **Erros de pagamento (402/409/429) viram mensagem genérica** para o

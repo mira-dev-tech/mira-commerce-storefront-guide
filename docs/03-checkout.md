@@ -1,7 +1,7 @@
 # 03 — Checkout headless (checkout sessions)
 
-O caminho 2 do guia: você constrói o funil inteiro e a plataforma valida,
-cria o pedido e cobra. O mecanismo central é a **sessão de checkout** — um
+O coração da loja headless: você constrói o funil inteiro e a plataforma
+valida, cria o pedido e cobra. O mecanismo central é a **sessão de checkout** — um
 estado server-side com TTL de 30 minutos que acumula carrinho, identidade e
 entrega até o fechamento.
 
@@ -96,7 +96,7 @@ Resposta `201`:
 }
 ```
 
-- Veio `checkout_url`? Redirecione o comprador (pagamento hospedado).
+- Veio `checkout_url`? Redirecione o comprador (página de pagamento do gateway).
 - Quer pagamento sem sair da sua página? → [doc 04](04-pagamento.md), iframe.
 - **`Idempotency-Key` é obrigatória na sua cabeça**: retry da mesma chave
   nunca duplica pedido. Gere um UUID por tentativa de fechamento.
